@@ -90,6 +90,17 @@ if (isset($_POST['add_to_cart'])) {
                     <p class="text-muted"><?php echo $row['brand']; ?></p>
                     <p><b>Rp <?php echo number_format($row['price']); ?></b></p>
 
+                    <!-- STOCK INFO -->
+                <?php if ($row['stock'] > 5) { ?>
+                <p class="text-success">Stok tersedia (<?php echo $row['stock']; ?> pcs)</p>
+
+                <?php } elseif ($row['stock'] > 0) { ?>
+                 <p class="text-danger">🔥 Sisa <?php echo $row['stock']; ?> pcs!</p>
+
+                <?php } else { ?>
+                <p class="text-secondary">Stok habis</p>
+                <?php } ?>
+
                     <form method="POST">
                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                         <input type="hidden" name="name" value="<?php echo $row['name']; ?>">
@@ -99,6 +110,10 @@ if (isset($_POST['add_to_cart'])) {
                         <button name="add_to_cart" class="btn btn-dark w-100">
                             + Keranjang
                         </button>
+                        <a href="checkout.php?buy=<?php echo $row['id']; ?>" 
+                    class="btn btn-outline-dark w-100 mt-2">
+                            ⚡ Beli Sekarang
+                    </a>
                     </form>
 
                 </div>

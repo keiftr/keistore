@@ -93,4 +93,4 @@ Table: `products`
 
 1. Clone repository:
 ```bash
-git clone https://github.com/username/keistore.git
+git clone https://github.com/keiftr/keistore.git

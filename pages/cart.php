@@ -1,5 +1,6 @@
 <?php
 session_start();
+include '../config/db.php';
 
 // pastikan cart ada
 if (!isset($_SESSION['cart'])) {
@@ -18,9 +19,23 @@ if (isset($_GET['remove'])) {
     unset($_SESSION['cart'][$_GET['remove']]);
 }
 
-// TAMBAH QTY
+// TAMBAH QTY (dengan batas stock)
 if (isset($_POST['increase'])) {
-    $_SESSION['cart'][$_POST['index']]['qty']++;
+
+    $index = $_POST['index'];
+    $id = $_SESSION['cart'][$index]['id'];
+
+    $q = mysqli_query($conn, "SELECT stock FROM products WHERE id='$id'");
+    $data = mysqli_fetch_assoc($q);
+    $stock = $data['stock'];
+
+    $current_qty = $_SESSION['cart'][$index]['qty'];
+
+    if ($current_qty < $stock) {
+        $_SESSION['cart'][$index]['qty']++;
+    } else {
+        $_SESSION['error_stock'] = true;
+    }
 }
 
 // KURANG QTY
@@ -40,7 +55,6 @@ $count = count($cart);
 <head>
     <title>Keranjang - Kei Store</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -50,7 +64,6 @@ $count = count($cart);
             60% { transform: scale(0.9); }
             100% { transform: scale(1); }
         }
-
         .cart-animate {
             animation: bounce 0.4s ease;
         }
@@ -78,7 +91,15 @@ $count = count($cart);
 
     <h2>Keranjang 🛒</h2>
 
+    <!-- 🔥 ALERT STOCK -->
+    <?php if (isset($_SESSION['error_stock'])) { ?>
+        <div class="alert alert-danger text-center">
+            ❌ Jumlah melebihi stok
+        </div>
+    <?php unset($_SESSION['error_stock']); } ?>
+
     <?php if (empty($cart)) { ?>
+
         <p>Keranjang kosong</p>
 
         <a href="catalog.php" class="btn btn-dark mt-3">
@@ -88,7 +109,7 @@ $count = count($cart);
     <?php } else { ?>
 
         <?php foreach ($cart as $index => $item) { 
-            $qty = $item['qty'] ?? 1;
+            $qty = $item['qty'];
             $subtotal = $item['price'] * $qty;
             $total += $subtotal;
         ?>
@@ -150,18 +171,6 @@ $count = count($cart);
     <?php } ?>
 
 </div>
-
-<!-- ANIMASI CART -->
-<script>
-function animateCart() {
-    let cart = document.getElementById("cart-icon");
-    cart.classList.add("cart-animate");
-
-    setTimeout(() => {
-        cart.classList.remove("cart-animate");
-    }, 400);
-}
-</script>
 
 </body>
 </html>
